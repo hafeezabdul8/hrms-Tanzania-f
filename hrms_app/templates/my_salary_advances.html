@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Salary Advances{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-10 rounded-t-2xl shadow-xl text-center">
+        <h1 class="text-5xl font-bold mb-4">My Salary Advances 💸</h1>
+        <p class="text-2xl opacity-90">Track your advance requests</p>
+    </div>
+
+    <div class="bg-white rounded-b-2xl shadow-xl p-10">
+        <!-- Request New Button -->
+        <div class="text-right mb-8">
+            <a href="{% url 'salary_advance' %}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition transform hover:scale-105">
+                Request New Advance
+            </a>
+        </div>
+
+        <!-- Advances List -->
+        {% if advances %}
+        <div class="space-y-6">
+            {% for adv in advances %}
+            <div class="border-2 {% if adv.status == 'approved' %}border-green-400{% elif adv.status == 'rejected' %}border-red-400{% else %}border-yellow-400{% endif %} rounded-xl p-8 shadow-md hover:shadow-xl transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-3xl font-bold text-gray-800">
+                            TZS {{ adv.amount|floatformat:0|intcomma }}
+                        </p>
+                        <p class="text-lg text-gray-600 mt-2">
+                            Requested on: {{ adv.request_date }}
+                        </p>
+                        <p class="text-gray-700 mt-4 italic">
+                            "{{ adv.reason }}"
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-8 py-4 text-2xl font-bold rounded-full
+                            {% if adv.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif adv.status == 'rejected' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ adv.status|capfirst }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20">
+            <p class="text-3xl text-gray-500">No salary advance requests yet.</p>
+            <p class="text-xl text-gray-400 mt-6">Click the button above to request your first one!</p>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="mt-12 text-center">
+            <a href="{% url 'dashboard' %}" class="text-amber-600 hover:text-amber-800 font-bold text-xl flex items-center justify-center gap-3 inline-flex">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

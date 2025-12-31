@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Welcome & Profile Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 mb-12 text-center">
+        <h2 class="text-5xl font-bold text-indigo-700 dark:text-indigo-400 mb-10">
+            Welcome back, {{ employee.user.get_full_name|default:employee.user.username }}! 👋
+        </h2>
+
+        <!-- Profile Picture & Upload -->
+        <div class="flex flex-col items-center gap-8">
+            <div class="relative">
+                {% if employee.profile_picture %}
+                    <img src="{{ employee.profile_picture.url }}" alt="Profile" class="w-48 h-48 rounded-full object-cover shadow-2xl border-8 border-white dark:border-gray-700">
+                {% else %}
+                    <div class="w-48 h-48 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-7xl font-bold shadow-2xl">
+                        {{ employee.user.username.0|upper }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'upload_profile_picture' %}" class="flex flex-col items-center gap-5">
+                {% csrf_token %}
+                <input type="file" name="profile_picture" accept="image/*" class="file:mr-6 file:py-4 file:px-8 file:rounded-full file:border-0 file:text-lg file:font-bold file:bg-gradient-to-r file:from-indigo-600 file:to-purple-600 file:text-white hover:file:from-indigo-700 hover:file:to-purple-700 cursor-pointer transition">
+                <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-full shadow-2xl transition transform hover:scale-110">
+                    Upload New Picture
+                </button>
+            </form>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="mt-6 text-2xl font-bold {% if message.tags == 'success' %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ message }}
+                    </p>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Employee Info Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-14">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-3xl shadow-2xl p-10 transform hover:scale-105 transition duration-300">
+            <h3 class="text-2xl font-semibold opacity-90 mb-4">Department</h3>
+            <p class="text-5xl font-bold">{{ employee.department.name|default:"Not Assigned" }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-500 to-green-700 text-white rounded-3xl shadow-2xl p-10 transform hover:scale-105 transition duration-300">
+            <h3 class="text-2xl font-semibold opacity-90 mb-4">Position</h3>
+            <p class="text-5xl font-bold">{{ employee.position|default:"N/A" }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-3xl shadow-2xl p-10 transform hover:scale-105 transition duration-300">
+            <h3 class="text-2xl font-semibold opacity-90 mb-4">Monthly Salary</h3>
+            <p class="text-5xl font-bold">TZS {{ employee.salary|floatformat:0|intcomma }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-14">
+        <a href="{% url 'payslip' %}" class="bg-gradient-to-r from-green-600 to-teal-600 text-white font-bold py-8 px-10 rounded-3xl shadow-2xl text-center transition transform hover:scale-110 hover:shadow-3xl">
+            <p class="text-3xl">View My Payslip 💰</p>
+        </a>
+
+        <a href="{% url 'apply_leave' %}" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-8 px-10 rounded-3xl shadow-2xl text-center transition transform hover:scale-110 hover:shadow-3xl">
+            <p class="text-3xl">Apply for Leave 🏖️</p>
+        </a>
+
+        <a href="{% url 'salary_advance' %}" class="bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-8 px-10 rounded-3xl shadow-2xl text-center transition transform hover:scale-110 hover:shadow-3xl">
+            <p class="text-3xl">Request Salary Advance 💸</p>
+        </a>
+    </div>
+
+    <!-- Today's Attendance + Clock In/Out -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-12 mb-14">
+        <h3 class="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-10">Today's Attendance</h3>
+        
+        {% with today_attendance=attendance.0 %}
+        <div class="text-center space-y-8">
+            <p class="text-3xl text-gray-700 dark:text-gray-300">
+                {{ today_attendance.date|date:"l, F j, Y" }}
+            </p>
+
+            <div class="flex justify-center gap-20 text-2xl">
+                <div>
+                    <p class="font-semibold text-gray-600 dark:text-gray-400">Check In</p>
+                    <p class="text-4xl font-bold text-indigo-600">
+                        {{ today_attendance.check_in|time:"H:i"|default:"—" }}
+                    </p>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-600 dark:text-gray-400">Check Out</p>
+                    <p class="text-4xl font-bold text-indigo-600">
+                        {{ today_attendance.check_out|time:"H:i"|default:"—" }}
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-3xl font-bold mt-8
+                {% if today_attendance.status == 'Present' %}text-green-600
+                {% elif today_attendance.status == 'Absent' %}text-red-600
+                {% else %}text-yellow-600{% endif %}">
+                Status: {{ today_attendance.status|default:"Not recorded" }}
+            </p>
+
+            <form method="post" action="{% url 'clock_in_out' %}" class="mt-10">
+                {% csrf_token %}
+                {% if not today_attendance.check_in %}
+                    <button type="submit" name="action" value="clock_in" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-16 rounded-full text-2xl shadow-2xl transition transform hover:scale-110">
+                        ⏰ Clock In Now
+                    </button>
+                {% elif not today_attendance.check_out %}
+                    <button type="submit" name="action" value="clock_out" 
+                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-16 rounded-full text-2xl shadow-2xl transition transform hover:scale-110">
+                        🚪 Clock Out
+                    </button>
+                {% else %}
+                    <p class="text-2xl text-gray-600 dark:text-gray-400">You've completed today's attendance. Great job! 🌟</p>
+                {% endif %}
+            </form>
+        </div>
+        {% endwith %}
+    </div>
+
+    <!-- Recent Activity Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-14">
+        <!-- Recent Attendance History -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10">
+            <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Recent Attendance</h3>
+            <div class="space-y-5">
+                {% for att in attendance|slice:":10" %}
+                <div class="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700">
+                    <span class="text-xl font-medium text-gray-700 dark:text-gray-300">{{ att.date|date:"M d" }}</span>
+                    <span class="px-8 py-3 rounded-full text-xl font-bold
+                        {% if att.status == 'Present' %}bg-green-100 text-green-800
+                        {% elif att.status == 'Absent' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ att.status }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 dark:text-gray-400 py-12 text-xl">No attendance records yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Leave Requests -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10">
+            <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">My Leave Requests</h3>
+            <div class="space-y-5">
+                {% for leave in leave_requests %}
+                <div class="py-4 border-b border-gray-200 dark:border-gray-700">
+                    <p class="text-xl font-medium text-gray-800 dark:text-gray-200">
+                        {{ leave.start_date }} → {{ leave.end_date }}
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ leave.reason|truncatechars:60 }}</p>
+                    <span class="inline-block mt-3 px-6 py-2 rounded-full text-base font-bold
+                        {% if leave.status == 'Approved' %}bg-green-100 text-green-800
+                        {% elif leave.status == 'Rejected' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ leave.status }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 dark:text-gray-400 py-12 text-xl">No leave requests yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Advance Requests -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 mb-14">
+        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">My Salary Advance Requests</h3>
+        <div class="space-y-6">
+            {% for req in salary_advance_requests %}
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl p-8 shadow-lg">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-3xl font-bold text-amber-700 dark:text-amber-400">
+                            TZS {{ req.amount|floatformat:0|intcomma }}
+                        </p>
+                        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                            Requested on {{ req.request_date }}
+                        </p>
+                        <p class="text-gray-700 dark:text-gray-300 mt-3 italic">
+                            "{{ req.reason }}"
+                        </p>
+                    </div>
+                    <span class="px-10 py-5 rounded-full text-2xl font-bold
+                        {% if req.status == 'approved' %}bg-green-100 text-green-800
+                        {% elif req.status == 'rejected' %}bg-red-100 text-red-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ req.status|capfirst }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-500 dark:text-gray-400 py-16 text-2xl">No salary advance requests yet.</p>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-10">
+            <a href="{% url 'my_salary_advances' %}" class="text-amber-600 dark:text-amber-400 hover:underline font-bold text-2xl">
+                View All Salary Advances →
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin Panel (Only for Superuser) -->
+    {% if user.is_superuser %}
+    <div class="bg-gradient-to-r from-purple-700 to-indigo-700 text-white rounded-3xl shadow-2xl p-12 text-center">
+        <h3 class="text-4xl font-bold mb-10">HR Admin Control Center</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <a href="{% url 'hr_approval' %}" class="bg-white/20 hover:bg-white/30 py-8 px-10 rounded-2xl backdrop-blur transition transform hover:scale-110">
+                <p class="text-2xl font-bold">Leave Approval</p>
+            </a>
+            <a href="{% url 'payroll_report' %}" class="bg-white/20 hover:bg-white/30 py-8 px-10 rounded-2xl backdrop-blur transition transform hover:scale-110">
+                <p class="text-2xl font-bold">Payroll Report</p>
+            </a>
+            <a href="{% url 'employee_list' %}" class="bg-white/20 hover:bg-white/30 py-8 px-10 rounded-2xl backdrop-blur transition transform hover:scale-110">
+                <p class="text-2xl font-bold">All Employees</p>
+            </a>
+            <a href="{% url 'salary_advance_approval' %}" class="bg-white/20 hover:bg-white/30 py-8 px-10 rounded-2xl backdrop-blur transition transform hover:scale-110">
+                <p class="text-2xl font-bold">Salary Advance Approval</p>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- This line fixes intcomma filter -->
+
+{% block title %}Payroll Report - {{ month }} {{ year }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-gradient-to-r from-green-600 to-teal-600 text-white p-8 rounded-t-xl shadow-lg">
+        <h2 class="text-4xl font-bold text-center">Monthly Payroll Report</h2>
+        <p class="text-center mt-3 text-2xl opacity-90">{{ month }} {{ year }}</p>
+    </div>
+
+    <div class="bg-white rounded-b-xl shadow-lg p-8">
+        <!-- Summary Card -->
+        <div class="bg-gradient-to-r from-green-100 to-teal-100 rounded-xl p-8 mb-10 text-center">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Total Payroll This Month</h3>
+            <p class="text-5xl font-bold text-green-700">TZS {{ total_payroll|floatformat:0|intcomma }}</p>
+            <p class="text-lg text-gray-600 mt-4">For {{ employees.count }} employees</p>
+        </div>
+
+        <!-- Employee Payroll Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-900">Employee</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-900">Department</th>
+                        <th class="px-6 py-4 text-left text-sm font-bold text-gray-900">Position</th>
+                        <th class="px-6 py-4 text-right text-sm font-bold text-gray-900">Monthly Salary</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for emp in employees %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                {% if emp.profile_picture %}
+                                    <img src="{{ emp.profile_picture.url }}" alt="{{ emp.user.username }}" class="w-10 h-10 rounded-full mr-4 object-cover">
+                                {% else %}
+                                    <div class="w-10 h-10 bg-indigo-500 rounded-full mr-4 flex items-center justify-center text-white font-bold">
+                                        {{ emp.user.username.0|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ emp.user.get_full_name|default:emp.user.username }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">{{ emp.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ emp.department.name|default:"—" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ emp.position }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-lg font-semibold text-green-700">
+                            TZS {{ emp.salary|floatformat:0|intcomma }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                            No employees on payroll yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-100">
+                    <tr>
+                        <td colspan="3" class="px-6 py-6 text-right text-xl font-bold text-gray-800">
+                            TOTAL PAYROLL
+                        </td>
+                        <td class="px-6 py-6 text-right text-2xl font-bold text-green-700">
+                            TZS {{ total_payroll|floatformat:0|intcomma }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="mt-10 text-center">
+            <a href="{% url 'dashboard' %}" class="text-indigo-600 hover:text-indigo-800 font-bold text-lg flex items-center justify-center gap-2 inline-flex">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

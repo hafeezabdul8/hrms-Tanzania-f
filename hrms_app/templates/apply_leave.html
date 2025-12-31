@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Apply for Leave{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
+            <h2 class="text-4xl font-bold text-center">Apply for Leave</h2>
+            <p class="text-center mt-2 opacity-90">Request your leave easily</p>
+        </div>
+
+        <div class="p-8">
+            <form method="post" class="space-y-8">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            Start Date
+                        </label>
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}
+                            <p class="text-red-600 text-sm mt-2">{{ form.start_date.errors }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            End Date
+                        </label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}
+                            <p class="text-red-600 text-sm mt-2">{{ form.end_date.errors }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        Reason for Leave
+                    </label>
+                    {{ form.reason }}
+                    {% if form.reason.errors %}
+                        <p class="text-red-600 text-sm mt-2">{{ form.reason.errors }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-center pt-6">
+                    <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-full shadow-lg transform hover:scale-105 transition duration-300 text-lg">
+                        Submit Leave Request
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-10 text-center">
+                <a href="{% url 'dashboard' %}" class="text-indigo-600 hover:text-indigo-800 font-medium text-lg flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

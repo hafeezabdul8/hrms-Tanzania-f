@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load humanize %}  <!-- This loads intcomma filter -->
+
+{% block title %}My Payslip{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-10 text-center">
+            <h1 class="text-5xl font-bold mb-2">My Payslip</h1>
+            <p class="text-2xl opacity-90">{{ current_month }}</p>
+        </div>
+
+        <div class="p-10">
+            <div class="flex flex-col md:flex-row items-center mb-12">
+                <!-- Profile Picture -->
+                <div class="mb-6 md:mb-0 md:mr-10">
+                    {% if employee.profile_picture %}
+                        <img src="{{ employee.profile_picture.url }}" alt="Profile" class="w-40 h-40 rounded-full object-cover shadow-xl border-4 border-white">
+                    {% else %}
+                        <div class="w-40 h-40 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-6xl font-bold shadow-xl">
+                            {{ employee.user.username.0|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Employee Info -->
+                <div class="text-center md:text-left">
+                    <h2 class="text-4xl font-bold text-gray-800">
+                        {{ employee.user.get_full_name|default:employee.user.username }}
+                    </h2>
+                    <div class="mt-4 space-y-2 text-lg">
+                        <p><span class="font-semibold">Department:</span> {{ employee.department.name|default:"Not assigned" }}</p>
+                        <p><span class="font-semibold">Position:</span> {{ employee.position }}</p>
+                        <p><span class="font-semibold">Hire Date:</span> {{ employee.hire_date }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salary & Status Card -->
+            <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-10 text-center">
+                <h3 class="text-2xl font-semibold text-gray-700 mb-6">Monthly Salary</h3>
+                <p class="text-6xl font-bold text-green-700 mb-6">
+                    TZS {{ employee.salary|floatformat:0|intcomma }}
+                </p>
+
+                <div class="inline-flex items-center gap-4">
+                    <span class="text-2xl font-bold 
+                        {% if employee.payment_status == 'paid' %}text-green-600
+                        {% elif employee.payment_status == 'pending' %}text-yellow-600
+                        {% else %}text-red-600{% endif %}">
+                        {{ employee.payment_status|capfirst }}
+                    </span>
+                    {% if employee.payment_status == 'paid' %}
+                        <svg class="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-12 text-center">
+                <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition transform hover:scale-105">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HRMS{% endblock %}</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between">
+            <h1 class="text-2xl font-bold">HRMS Tanzania</h1>
+        {% if user.is_authenticated %}
+    <span class="text-lg">Hello, {{ user.get_full_name|default:user.username }}!</span>
+    
+    <form method="post" action="{% url 'logout' %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="text-white hover:underline ml-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition">
+            Logout
+        </button>
+    </form>
+{% else %}
+    <a href="{% url 'login' %}" class="hover:underline">Login</a>
+{% endif %}
+        </div>
+    </nav>
+    <div class="container mx-auto mt-8 p-4">
+        {% block content %}{% endblock %}
+    </div>
+    <a href="{% url 'logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="hover:underline cursor-pointer">
+    Logout
+</a>
+<form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+    {% csrf_token %}
+</form>
+</body>
+</html>

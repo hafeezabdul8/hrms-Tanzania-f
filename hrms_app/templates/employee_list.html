@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}All Employees{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-4xl font-bold text-indigo-700">
+            All Employees 👥
+        </h2>
+        <!-- Beautiful Back to Dashboard Button -->
+        <a href="{% url 'dashboard' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition transform hover:scale-105 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-indigo-600 text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Name</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Email</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Department</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Position</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Salary (TZS)</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Hire Date</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for emp in employees %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ emp.user.get_full_name|default:emp.user.username }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ emp.user.email|default:"—" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {{ emp.department.name|default:"—" }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ emp.position }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ emp.salary|floatformat:0 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ emp.hire_date }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <!-- Edit Button -->
+                            <a href="{% url 'admin:hrms_app_employee_change' emp.id %}" class="text-indigo-600 hover:text-indigo-900 mr-4">
+                                Edit
+                            </a>
+                            <!-- Delete Button with Confirmation -->
+                            <a href="{% url 'admin:hrms_app_employee_delete' emp.id %}" 
+                               class="text-red-600 hover:text-red-900"
+                               onclick="return confirm('Are you sure you want to delete {{ emp.user.username }}? This cannot be undone.')">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            No employees added yet. Add some in the admin panel!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
